@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="kz.kuz.servicejobservice">
+    <permission android:name="kz.kuz.servicejobservice.PRIVATE"
+        android:protectionLevel="signature"/>
+    <!--
+    добавляем тег permission, чтобы другие приложения не могли получить наши широковещательные
+    интенты. Каждый permission должен иметь protectionLevel
+    signature означает, что для получения разрешения нужно указать такой же ключ
+    normal - пользователь видит разрешение, но запроса на предоставление не получает
+    dangerous - во время выполнения требуют явного подтверждения
+    signature - используется для внутренней функциональности, пользователь не оповещается
+    signatureOrSystem - аналог signature, но разрешение даётся всем пакетам в образе Android
+    (большинству разработчиков интереса не представляет)
+    -->
+
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
+    <!-- в манифест включено разрешение на получение информации boot completed -->
+    <uses-permission android:name="kz.kuz.fragmentapplication.PRIVATE"/>
+    <!--
+    добавляем разрешение на получение защищённого интента, его необходимо добавить, даже если мы
+    сами отправляем интент
+    -->
+
+    <application
+        android:allowBackup="true"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:roundIcon="@mipmap/ic_launcher_round"
+        android:supportsRtl="true"
+        android:theme="@style/Theme.FragmentApplication">
+        <activity
+            android:name="kz.kuz.servicejobservice.MainActivity"
+            android:label="@string/main_title"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        <service
+            android:name="kz.kuz.servicejobservice.MyService"
+            android:permission="android.permission.BIND_JOB_SERVICE"
+            android:exported="true"/>
+        <!-- в манифест включён receiver -->
+        <receiver android:name="kz.kuz.servicejobservice.StartupReceiver"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED"/>
+                <!--
+                StartupReceiver прослушивает действие BOOT_COMPLETED,
+                он будет просыпаться при каждой отправке этого интента, даже если приложение
+                не выполняется
+                -->
+            </intent-filter>
+        </receiver>
+        <receiver
+            android:name="kz.kuz.servicejobservice.NotificationReceiver"
+            android:exported="false">
+            <!--
+            регистрируем приёмник, назначаем низкий приоритет (значение -1000 и ниже
+            зарезервированы), exported=false, чтобы он не был виден другим приложениям
+            -->
+            <intent-filter android:priority="-999">
+                <action android:name="kz.kuz.fragmentapplication.SHOW_NOTIFICATION"/>
+            </intent-filter>
+        </receiver>
+    </application>
+
+</manifest>
